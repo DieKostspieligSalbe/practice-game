@@ -1,2 +1,2 @@
 # practice-game
-My little games classes I use for practice
+I use this to chaotically practice stuff and make myself ashamed in the future
