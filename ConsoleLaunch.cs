@@ -22,8 +22,9 @@ namespace Gam
             Console.WriteLine("Swim: press down to enter the water, press up to come out of it");
             Console.WriteLine("Info: type who to see what characters are nearby. Type where or info %name% to see their coords or info.");
             Console.WriteLine("Use save and load if needed, press E to exist");
-
             Console.WriteLine("Type name of a nearby character to see possible actions");
+
+            
         }
         static void CharacterEventHandler(string message, Character character)
         {
@@ -36,7 +37,7 @@ namespace Gam
         }
         static Character CreateCharacter(string name, Race race)
         {
-            Character ch = null;
+            Character? ch = null;
             switch (race)
             {
                 case Race.Mermaid:
@@ -59,7 +60,7 @@ namespace Gam
         }
         static Character CreateCharacter(string name, string race)
         {
-            Character ch = null;
+            Character? ch = null;
             switch (race)
             {
                 case "Mermaid":
@@ -83,7 +84,7 @@ namespace Gam
         static string CharacterCreation(out Character ch)
         {
             Console.WriteLine("What's your char name?");
-            string name = Console.ReadLine();
+            string? name = Console.ReadLine();
             if (string.IsNullOrWhiteSpace(name))
             {
                 Console.WriteLine("Name cannot be blank");
@@ -95,24 +96,24 @@ namespace Gam
             {
                 case '2':
                     Console.Write("\nYou've created a Mermaid");
-                    ch = CreationEventHelper(name, Race.Mermaid);
-                    return name;
+                    ch = CreationEventHelper(name!, Race.Mermaid);
+                    return name!;
                 case '1':
                     Console.Write("\nYou've created a Human");
-                    ch = CreationEventHelper(name, Race.Human);
-                    return name;
+                    ch = CreationEventHelper(name!, Race.Human);
+                    return name!;
                 case '3':
                     Console.Write("\nYou've created a Fae");
-                    ch = CreationEventHelper(name, Race.Fae);
-                    return name;
+                    ch = CreationEventHelper(name!, Race.Fae);
+                    return name!;
                 case '4':
                     Console.Write("\nYou've created a Valkyrae");
-                    ch = CreationEventHelper(name, Race.Valkyrae);
-                    return name;
+                    ch = CreationEventHelper(name!, Race.Valkyrae);
+                    return name!;
                 default:
                     Console.WriteLine("Your input is invalid, please try again");
                     CharacterCreation(out ch);
-                    return name;
+                    return name!;
             }
 
             Character CreationEventHelper(string name, Race race)
@@ -208,7 +209,7 @@ namespace Gam
                 ProcessCharacterChosen(currentChar, character);
             }
 
-            Character CheckForNames(string name)
+            Character? CheckForNames(string name)
             {
                 if (dict.ContainsKey(name))
                 {
@@ -240,20 +241,22 @@ namespace Gam
 
         static void Main(string[] args)
         {
+            Map map = new();
             var charTable = new Dictionary<string, Character>();
             bool sprintMode = false;
-            string lookCharByName;
-            string name;
+            string? lookCharByName;
+            string? name;
             bool nameExists;
-            Character checkChar;
-            Character usedChar = null;
+            Character? checkChar;
+            Character? usedChar = null;
             
 
             //добавить метод, который при загрузке автоматически определит isAlive и isWet
             Instruct();
-            string indicator = string.Empty;
+            string? indicator = string.Empty;
             while (indicator != "e")
             {
+                map.DrawMapConsole();
                 indicator = Console.ReadLine();
                 switch (indicator)
                 {
