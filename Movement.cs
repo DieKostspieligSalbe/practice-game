@@ -40,6 +40,18 @@ namespace PracticeGame
         public int Z { get; set; } = 0;
         public Surface Surface { get; set; } = Surface.Ground;
 
+        public Coords()
+        {
+
+        }
+        public Coords(int x, int y, int z, Surface surface)
+        {
+            X = x;
+            Y = y;
+            Z = z;
+            Surface = surface;
+        }
+
     }
 
     internal class Map
@@ -47,13 +59,16 @@ namespace PracticeGame
         public List<Character>? CharacterList { get; set; } = new();
         public List<Cell>? CellList { get; set; } = new();
         private readonly int _size;
+        private readonly int _middleCellIndex;
         public Map()
         {
-            _size = 5;
+            _size = 15;
             for (int i = 0; i < _size * _size; i++)
             {
                 CellList?.Add(new Cell());
+                CellList![i].indexInCurrentList = i;
             }
+            _middleCellIndex = CellList!.Count / 2;
             GiveCellCoords();
             GenerateCellSurface();
         }
@@ -61,10 +76,10 @@ namespace PracticeGame
         public void DrawMapConsole()
         {
             char surfaceSymbol;
-            Console.WriteLine("Map:");
+            Console.WriteLine("\nMap:");
             for (int i = 0; i < CellList?.Count; i++)
             {
-                if (CellList[i].CellCharacter != null )
+                if (CellList[i].CellCharacterList?.Count > 0)
                 {
                     DrawCellWithCharacter(CellList[i]);
                 }
@@ -80,14 +95,14 @@ namespace PracticeGame
 
             void DrawCell(Cell cell)
             {
-                surfaceSymbol = cell.CellSurface == Surface.Water ? '~' : '_';
+                surfaceSymbol = cell.CellCoords.Surface == Surface.Water ? '~' : '_';
                 Console.Write($"|{surfaceSymbol}{surfaceSymbol}{surfaceSymbol}|");
             }
 
             void DrawCellWithCharacter(Cell cell)
             {
-                char nameFirstLetter = cell.CellCharacter!.Name[0];
-                surfaceSymbol = cell.CellSurface == Surface.Water ? '~' : '_';
+                char nameFirstLetter = cell.CellCharacterList![0].Name[0];
+                surfaceSymbol = cell.CellCoords.Surface == Surface.Water ? '~' : '_';
                 Console.Write($"|{surfaceSymbol}{nameFirstLetter}{surfaceSymbol}|");
             }
         }
@@ -173,30 +188,62 @@ namespace PracticeGame
             {
                 if (CellList[i].NeighborCells.Count > 0 && rand.NextDouble() >= 0.7)
                 {
-                    CellList[i].NeighborCells[0].CellSurface = Surface.Water;
+                    CellList[i].NeighborCells[0].CellCoords.Surface = Surface.Water;
                     if (CellList[i].NeighborCells.Count > 1 && rand.NextDouble() >= 0.7)
                     {
-                        CellList[i].NeighborCells[0].CellSurface = Surface.Water;
+                        CellList[i].NeighborCells[0].CellCoords.Surface = Surface.Water;
                     }
                 }
             }
         }
+        public void AddCharacter(Character ch)
+        {
+            CharacterList?.Add(ch);
+            CellList![_middleCellIndex].CellCharacterList?.Add(ch);
+        }
+        public void CharacterMovementUpdate(Character ch, Direction direction, bool isFast)
+        {
+            Coords initicalCoords = new(ch.Coords.X, ch.Coords.Y, ch.Coords.Z, ch.Coords.Surface);
+            int currentCellIndex = CellList!.Where(x => x.CellCoords.X == ch.Coords.X).Where(x => x.CellCoords.Y == ch.Coords.Y).Single().indexInCurrentList;
+            bool moveSuccess = ch.Move(direction, isFast);
+            if (moveSuccess)
+            {
+                int? newCellIndex = CellList!.Where(x => x.CellCoords.X == ch.Coords.X).Where(x => x.CellCoords.Y == ch.Coords.Y).SingleOrDefault()?.indexInCurrentList;
+
+                if (newCellIndex is null)
+                {
+                    ch.OnCharAction($"The cell you want to move to is outside the bounds of the map. {ch.Name} remains in the same position", ch);
+                    ch.MoveCharacterBack(initicalCoords);
+                }
+                else
+                {
+                    CellList![currentCellIndex].CellCharacterList!.RemoveAll(x => x == ch);
+                    CellList![(int)newCellIndex].CellCharacterList?.Add(ch);
+                    ch.Coords.Surface = CellList![(int)newCellIndex].CellCoords.Surface;
+                }                                       
+            }
+        }
 
     
-    }
+    }//add flight
+    //add loading characters on the map
+    //add map size variations
+    //add surface check to char when changes a cell or smth
+    //change messages when switching ground to water and vv
 
     internal class Cell
     {
-        public Character? CellCharacter { get; set; } = null;
+        public List<Character>? CellCharacterList { get; set; } = new();
         public Coords CellCoords { get; set; } = new();
-        public Surface CellSurface { get; set; } = Surface.Ground;
         public BorderCell BorderCellState { get; set; } = BorderCell.NotBC;
         public List<Cell> NeighborCells { get; set; } = new();
+        public int indexInCurrentList;
 
         public Cell()
         {
             CellCoords = new Coords();
         }
+
 
 
     }

@@ -30,7 +30,7 @@ namespace PracticeGame
         public Mermaid(string name) : base(name)
         {
         }
-        public override void Move(Direction direction, bool isFast)
+        public override bool Move(Direction direction, bool isFast)
         {
             int speedmode = SwimmingSpeed;
             string movingVerb = "swims";
@@ -47,7 +47,7 @@ namespace PracticeGame
                     case Direction.ZDown:
                         Coords.Z -= speedmode;
                         OnCharAction($"{Name} {movingVerb} {speedmode} meters down", this);
-                        break;
+                        return true;
                     case Direction.ZUp:
                         Coords.Z += speedmode;
                         if (Coords.Z >= 0)
@@ -55,18 +55,20 @@ namespace PracticeGame
                             Coords.Surface = Surface.Ground;
                             Coords.Z = 0;
                             OnCharAction($"{Name} comes out of water", this);
+                            return true;
                         }
                         else
                         {
                             OnCharAction($"{Name} {movingVerb} {speedmode} meters up", this);
                         }
-                        break;
+                        return true;
                 }
             }
             else
             {
-                base.Move(direction, isFast);
+                return base.Move(direction, isFast);
             }
+            return false;
         }
         public override void Info()
         {

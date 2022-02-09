@@ -42,7 +42,7 @@ namespace PracticeGame
         public bool IsAlive { get; set; } = true;
         public bool IsWet { get; set; } = false;
 
-        protected virtual void OnCharAction(string message, Character character)
+        public virtual void OnCharAction(string message, Character character)
         {        
             MessageCharAction?.Invoke(message, this);
         }
@@ -58,7 +58,11 @@ namespace PracticeGame
         {
             MessageCharAction?.Invoke($"Name: {Name}, Race: {Race}, Health: {Health} \nWalking speed: {WalkingSpeed}, Running Speed: {RunningSpeed} \nSwimming speed: {SwimmingSpeed}", this);
         }
-        public virtual void Move(Direction direction, bool isFast)
+        public virtual void MoveCharacterBack(Coords coords)
+        {
+            this.Coords = coords;
+        }
+        public virtual bool Move(Direction direction, bool isFast)
         {
             string movingVerb = "";
             bool success = true;
@@ -114,15 +118,13 @@ namespace PracticeGame
                     {
                         Coords.Z++;
                         Coords.Surface = Surface.Ground;
-                        success = false;
                         MessageCharAction?.Invoke($"{Name} comes out of water", this);
-                        break;
+                        return true;
                     }
                     else
                     {
-                        success = false;
                         MessageCharAction?.Invoke($"You cannot move up from there", this);
-                        break;
+                        return false;
                     }
                 case Direction.ZDown:
                     if (Coords.Z == 0 && Coords.Surface == Surface.Ground)
@@ -130,22 +132,22 @@ namespace PracticeGame
                         Coords.Z--;
                         Coords.Surface = Surface.Water;
                         IsWet = true;
-                        success = false;
                         MessageCharAction?.Invoke($"{Name} enters the water", this);
-                        break;
+                        return true;
                     }
                     else
                     {
-                        success = false;
                         MessageCharAction?.Invoke("You cannot move down from there", this);
-                        break;
+                        return false;
                     }
 
             }
             if (success)
             {
                 MessageCharAction?.Invoke($"{Name} {movingVerb} {distanceModifier} meters {directionLocal}", this);
+                return true;
             }
+            return false;
         }
 
         public bool IsClose(Character char2, int distance = 2)

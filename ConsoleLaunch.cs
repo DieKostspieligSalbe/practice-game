@@ -81,38 +81,38 @@ namespace Gam
                     return ch;
             }
         }
-        static string CharacterCreation(out Character ch)
+        static string CharacterCreation(out Character ch, Map map)
         {
             Console.WriteLine("What's your char name?");
             string? name = Console.ReadLine();
             if (string.IsNullOrWhiteSpace(name))
             {
                 Console.WriteLine("Name cannot be blank");
-                CharacterCreation(out ch);
+                CharacterCreation(out ch, map);
             }
             Console.WriteLine("What's your char race? \n1. Human   2. Mermaid   3. Fae   4.Valkyrae");
             ConsoleKeyInfo choice = Console.ReadKey();
             switch (choice.KeyChar)
             {
                 case '2':
-                    Console.Write("\nYou've created a Mermaid");
+                    Console.Write($"\nYou've created a Mermaid named {name}");
                     ch = CreationEventHelper(name!, Race.Mermaid);
                     return name!;
                 case '1':
-                    Console.Write("\nYou've created a Human");
+                    Console.Write($"\nYou've created a Human named {name}");
                     ch = CreationEventHelper(name!, Race.Human);
                     return name!;
                 case '3':
-                    Console.Write("\nYou've created a Fae");
+                    Console.Write($"\nYou've created a Fae named {name}");
                     ch = CreationEventHelper(name!, Race.Fae);
                     return name!;
                 case '4':
-                    Console.Write("\nYou've created a Valkyrae");
+                    Console.Write($"\nYou've created a Valkyrae named {name}");
                     ch = CreationEventHelper(name!, Race.Valkyrae);
                     return name!;
                 default:
                     Console.WriteLine("Your input is invalid, please try again");
-                    CharacterCreation(out ch);
+                    CharacterCreation(out ch, map);
                     return name!;
             }
 
@@ -121,6 +121,7 @@ namespace Gam
                 Character ch = CreateCharacter(name, race);
                 ch.MessageCharAction += CharacterEventHandler;
                 ch.MessageTwoCharAction += TwoCharacterEventHandler;
+                map.AddCharacter(ch);
                 return ch;
             }
         }
@@ -275,7 +276,7 @@ namespace Gam
                         }
                         break;
                     case "create":
-                        name = CharacterCreation(out Character ch1);
+                        name = CharacterCreation(out Character ch1, map);
                         charTable.Add(name, ch1);
                         nameExists = charTable.TryGetValue(name, out checkChar);
                         if (nameExists)
@@ -311,7 +312,7 @@ namespace Gam
                             break;
                         } else
                         {
-                            usedChar.Move(Direction.YForward, sprintMode);
+                            map.CharacterMovementUpdate(usedChar!, Direction.YForward, sprintMode);
                             break;
                         }
                     case "s":
@@ -322,7 +323,7 @@ namespace Gam
                         }
                         else
                         {
-                            usedChar.Move(Direction.YBackward, sprintMode);
+                            map.CharacterMovementUpdate(usedChar!, Direction.YBackward, sprintMode);
                             break;
                         }
                     case "a":
@@ -333,7 +334,7 @@ namespace Gam
                         }
                         else
                         {
-                            usedChar.Move(Direction.XLeft, sprintMode);
+                            map.CharacterMovementUpdate(usedChar!, Direction.XLeft, sprintMode);
                             break;
                         }
                     case "d":
@@ -344,7 +345,7 @@ namespace Gam
                         }
                         else
                         {
-                            usedChar.Move(Direction.XRight, sprintMode);
+                            map.CharacterMovementUpdate(usedChar!, Direction.XRight, sprintMode);
                             break;
                         }
                     case "up":
@@ -360,7 +361,7 @@ namespace Gam
                         }
                         else
                         {
-                            usedChar.Move(Direction.ZUp, sprintMode);
+                            map.CharacterMovementUpdate(usedChar!, Direction.ZUp, sprintMode);
                             break;
                         }
                     case "down":
@@ -371,7 +372,7 @@ namespace Gam
                         }
                         else
                         {
-                            usedChar.Move(Direction.ZDown, sprintMode);
+                            map.CharacterMovementUpdate(usedChar!, Direction.ZDown, sprintMode);
                             break;
                         }
                     case "fly":
