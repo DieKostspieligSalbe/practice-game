@@ -94,8 +94,9 @@ namespace PracticeGame
             
 
             int xMin; int yMax;
-            xMin = ~(_size / 2) + 1;
             yMax = _size / 2;
+            xMin = ~yMax + 1;
+            
 
             middleCell.CellCoords.X = 0; middleCell.CellCoords.Y = 0;
             FindBorderCells();
