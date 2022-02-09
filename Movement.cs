@@ -46,7 +46,7 @@ namespace PracticeGame
     {
         public List<Character>? CharacterList { get; set; } = new();
         public List<Cell>? CellList { get; set; } = new();
-        private int _size;
+        private readonly int _size;
         public Map()
         {
             _size = 5;
@@ -68,7 +68,7 @@ namespace PracticeGame
                 }
                 else
                 {
-                    DrawCell(CellList[i]);
+                    DrawCell();
                 }
                 if ((i + 1) % _size == 0)
                 {
@@ -76,9 +76,9 @@ namespace PracticeGame
                 }
             }
 
-            void DrawCell(Cell cell)
+            void DrawCell()
             {
-                Console.Write($"|___|");
+                Console.Write("|___|");
             }
 
             void DrawCellWithCharacter(Cell cell)
@@ -89,19 +89,14 @@ namespace PracticeGame
         }
         private void GiveCellCoords()
         {
-            int middleCellIndex = CellList.Count / 2;
-            Cell middleCell = CellList[middleCellIndex];
             
-
             int xMin; int yMax;
             yMax = _size / 2;
             xMin = ~yMax + 1;
             
-
-            middleCell.CellCoords.X = 0; middleCell.CellCoords.Y = 0;
             FindBorderCells();
 
-            for (int i = 0, x = xMin, y = yMax; i < CellList.Count; i++)
+            for (int i = 0, x = xMin, y = yMax; i < CellList!.Count; i++)
             {
                 if (i != 0 && CellList[i].BorderCellState == BorderCell.LeftBC) //resets coordinates when a new row is approached
                 {
@@ -120,7 +115,7 @@ namespace PracticeGame
 
             void FindBorderCells()
             {
-                for (int i = 0; i < CellList.Count; i++)
+                for (int i = 0; i < CellList!.Count; i++)
                 {
                     if (i < _size)
                     {
