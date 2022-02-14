@@ -11,7 +11,7 @@ namespace PracticeGame
         int FlyingSpeed { get; set; }
         int FlyingFastSpeed { get; set; }
         void Fly();
-        void FlyMove(Direction direction, bool isFast);
+        bool FlyMove(Direction direction, bool isFast, out string message);
         void Land();
 
     }
@@ -31,16 +31,19 @@ namespace PracticeGame
         public virtual event Action<string, Character, Character>? MessageTwoCharAction;
         public virtual event Action<string, Character, Character[]>? MessageManyCharAction;
         public int Health { get; set; } = 100;
-        public Coords Coords { get; protected set; } = new Coords();
+        public Coords Coords { get; set; } = new Coords();
         public string Name { get; protected set; }
         public virtual int SwimmingSpeed { get; protected set; } = 1;
         public virtual int SwimmingFastSpeed { get; protected set; }
-        public virtual int WalkingSpeed { get; protected set; } = 3;
-        public virtual int RunningSpeed { get; protected set; } = 5;
+        public virtual int WalkingSpeed { get; protected set; } = 1;
+        public virtual int RunningSpeed { get; protected set; } = 2;
         public virtual Race Race { get; protected set; } = Race.Human;
         public virtual int PhysicalDamage { get; protected set; }
         public bool IsAlive { get; set; } = true;
         public bool IsWet { get; set; } = false;
+        public Cell? Cell { get; set; }
+
+
 
         public virtual void OnCharAction(string message, Character character)
         {        
@@ -62,7 +65,7 @@ namespace PracticeGame
         {
             this.Coords = coords;
         }
-        public virtual bool Move(Direction direction, bool isFast)
+        public virtual bool Move(Direction direction, bool isFast, out string message)
         {
             string movingVerb = "";
             bool success = true;
@@ -83,16 +86,8 @@ namespace PracticeGame
                     }
                     break;
                 case Surface.Water:
-                    if (!isFast)
-                    {
-                        movingVerb = "swims";
-                        distanceModifier = SwimmingSpeed;
-                    }
-                    else
-                    {
-                        movingVerb = "quickly swims";
-                        distanceModifier = SwimmingFastSpeed;
-                    }
+                    movingVerb = "swims";
+                    distanceModifier = SwimmingSpeed;
                     break;
             }
             switch (direction)
@@ -118,12 +113,12 @@ namespace PracticeGame
                     {
                         Coords.Z++;
                         Coords.Surface = Surface.Ground;
-                        MessageCharAction?.Invoke($"{Name} comes out of water", this);
+                        message = $"{Name} comes out of water";
                         return true;
                     }
                     else
                     {
-                        MessageCharAction?.Invoke($"You cannot move up from there", this);
+                        message = $"You cannot move up from there";
                         return false;
                     }
                 case Direction.ZDown:
@@ -132,21 +127,22 @@ namespace PracticeGame
                         Coords.Z--;
                         Coords.Surface = Surface.Water;
                         IsWet = true;
-                        MessageCharAction?.Invoke($"{Name} enters the water", this);
+                        message = $"{Name} enters the water";
                         return true;
                     }
                     else
                     {
-                        MessageCharAction?.Invoke("You cannot move down from there", this);
+                        message = "You cannot move down from there";
                         return false;
                     }
 
             }
             if (success)
             {
-                MessageCharAction?.Invoke($"{Name} {movingVerb} {distanceModifier} meters {directionLocal}", this);
+                message = $"{Name} {movingVerb} {distanceModifier} meters {directionLocal}";
                 return true;
             }
+            message = string.Empty;
             return false;
         }
 
@@ -202,10 +198,11 @@ namespace PracticeGame
             }           
         }
 
-        public void FlyMove(Direction direction, bool isFast)
+        public bool FlyMove(Direction direction, bool isFast, out string message)
         {
             string directionLocal = string.Empty;
             int speedMode = FlyingSpeed;
+            message = string.Empty;
             if (isFast)
             {
                 speedMode = FlyingFastSpeed;
@@ -243,13 +240,19 @@ namespace PracticeGame
             }
             else
             {
-                MessageCharAction?.Invoke($"{Name} flies {speedMode} meters {directionLocal}", this);
+                message = $"{Name} flies {speedMode} meters {directionLocal}";
+                return true;
             }
+            return false;
         }
 
-        public void Land()
+        public void Land() 
         {
-            Coords.Surface = Surface.Ground;
+            Coords.Surface = Cell!.CellCoords.Surface;
+            if (Coords.Surface == Surface.Water)
+            {
+                IsWet = true;
+            }
             MessageCharAction?.Invoke($"{Name} lands", this);
             if (Coords.Z > 2)
             {

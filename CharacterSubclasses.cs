@@ -9,7 +9,7 @@ namespace PracticeGame
 {
     internal class Human : Character
     {
-        public override int SwimmingSpeed { get; protected set; } = 3;
+        public override int SwimmingSpeed { get; protected set; } = 1;
         public override int PhysicalDamage { get; protected set; } = 3;
 
         public Human(string name) : base(name)
@@ -20,20 +20,21 @@ namespace PracticeGame
 
     internal class Mermaid : Character
     {
-        public override int SwimmingSpeed { get; protected set; } = 6;
-        public override int SwimmingFastSpeed { get; protected set; } = 10;
-        public override int WalkingSpeed { get; protected set; } = 2;
-        public override int RunningSpeed { get; protected set; } = 3;
+        public override int SwimmingSpeed { get; protected set; } = 2;
+        public override int SwimmingFastSpeed { get; protected set; } = 3;
+        public override int WalkingSpeed { get; protected set; } = 1;
+        public override int RunningSpeed { get; protected set; } = 2;
         public override Race Race { get; protected set; } = Race.Mermaid;
         public override int PhysicalDamage { get; protected set; } = 2;
 
         public Mermaid(string name) : base(name)
         {
         }
-        public override bool Move(Direction direction, bool isFast)
+        public override bool Move(Direction direction, bool isFast, out string message)
         {
             int speedmode = SwimmingSpeed;
             string movingVerb = "swims";
+            message = string.Empty;
             if (isFast)
             {
                 speedmode = SwimmingFastSpeed;
@@ -46,7 +47,7 @@ namespace PracticeGame
                 {
                     case Direction.ZDown:
                         Coords.Z -= speedmode;
-                        OnCharAction($"{Name} {movingVerb} {speedmode} meters down", this);
+                        message = $"{Name} {movingVerb} {speedmode} meters down";
                         return true;
                     case Direction.ZUp:
                         Coords.Z += speedmode;
@@ -54,19 +55,19 @@ namespace PracticeGame
                         {
                             Coords.Surface = Surface.Ground;
                             Coords.Z = 0;
-                            OnCharAction($"{Name} comes out of water", this);
+                            message = $"{Name} comes out of water";
                             return true;
                         }
                         else
                         {
-                            OnCharAction($"{Name} {movingVerb} {speedmode} meters up", this);
+                            message = $"{Name} {movingVerb} {speedmode} meters up";
                         }
                         return true;
                 }
             }
             else
             {
-                return base.Move(direction, isFast);
+                return base.Move(direction, isFast, out message);
             }
             return false;
         }
@@ -80,11 +81,11 @@ namespace PracticeGame
 
     internal class Fae : Character.FlyingCharacter
     {
-        public override int SwimmingSpeed { get; protected set; } = 2;
+        public override int SwimmingSpeed { get; protected set; } = 1;
         public override Race Race { get; protected set; } = Race.Fae;
         public override int PhysicalDamage { get; protected set; } = 3;
-        public override int FlyingSpeed { get; set; } = 3;
-        public override int FlyingFastSpeed { get; set; } = 6;
+        public override int FlyingSpeed { get; set; } = 1;
+        public override int FlyingFastSpeed { get; set; } = 2;
 
         public Fae(string name) : base(name)
         {
@@ -94,11 +95,11 @@ namespace PracticeGame
     internal class Valkyrae : Character.FlyingCharacter
     {
         public override int SwimmingSpeed { get; protected set; } = 1;
-        public override int RunningSpeed { get; protected set; } = 4;
+        public override int RunningSpeed { get; protected set; } = 3;
         public override Race Race { get; protected set; } = Race.Valkyrae;
         public override int PhysicalDamage { get; protected set; } = 4;
-        public override int FlyingSpeed { get; set; } = 5;
-        public override int FlyingFastSpeed { get; set; } = 10;
+        public override int FlyingSpeed { get; set; } = 2;
+        public override int FlyingFastSpeed { get; set; } = 4;
         public Valkyrae(string name) : base(name)
         {
 

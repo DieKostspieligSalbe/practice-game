@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static PracticeGame.Character;
 
 namespace PracticeGame
 {
@@ -33,6 +34,13 @@ namespace PracticeGame
         ZUp,
         ZDown
     }
+
+    public enum MovementType
+    {
+        GroundMovement,
+        Flight
+    }
+
     internal class Coords
     {
         public int X { get; set; } = 0;
@@ -63,12 +71,35 @@ namespace PracticeGame
         public Map()
         {
             _size = 15;
+            _middleCellIndex = _size * _size / 2;
+            MakeMap();
+        }
+
+        public Map(int size)
+        {
+            if (size < 3)
+            {
+                _size = 15;
+            }
+            else if (size % 2 == 0)
+            {
+                _size = ++size;
+            }
+            else
+            {
+                _size = size;
+            }
+            _middleCellIndex = _size * _size / 2;
+            MakeMap();
+        }
+
+        private void MakeMap()
+        {
             for (int i = 0; i < _size * _size; i++)
             {
                 CellList?.Add(new Cell());
                 CellList![i].indexInCurrentList = i;
             }
-            _middleCellIndex = CellList!.Count / 2;
             GiveCellCoords();
             GenerateCellSurface();
         }
@@ -186,26 +217,56 @@ namespace PracticeGame
             Random rand = new();
             for (int i = 0; i < CellList!.Count; i++)
             {
-                if (CellList[i].NeighborCells.Count > 0 && rand.NextDouble() >= 0.7)
+                if (CellList[i].NeighborCells.Count > 0 && rand.NextDouble() >= 0.8)
                 {
                     CellList[i].NeighborCells[0].CellCoords.Surface = Surface.Water;
-                    if (CellList[i].NeighborCells.Count > 1 && rand.NextDouble() >= 0.7)
+                    if (CellList[i].NeighborCells.Count > 1 && rand.NextDouble() >= 0.8)
                     {
                         CellList[i].NeighborCells[0].CellCoords.Surface = Surface.Water;
                     }
                 }
             }
+            CellList![_middleCellIndex].CellCoords.Surface = Surface.Ground;
         }
         public void AddCharacter(Character ch)
         {
             CharacterList?.Add(ch);
             CellList![_middleCellIndex].CellCharacterList?.Add(ch);
+            ch.Coords.Surface = CellList![_middleCellIndex].CellCoords.Surface;
+            if (ch.Coords.Surface == Surface.Water)
+            {
+                ch.IsWet = true;
+            }
+            ch.Cell = CellList![_middleCellIndex];
         }
-        public void CharacterMovementUpdate(Character ch, Direction direction, bool isFast)
+        public void AddCharacterToOtherCell(Character ch)
         {
-            Coords initicalCoords = new(ch.Coords.X, ch.Coords.Y, ch.Coords.Z, ch.Coords.Surface);
+            CharacterList?.Add(ch);
+            int charCellIndex = CellList!.Where(x => x.CellCoords.X == ch.Coords.X).Where(x => x.CellCoords.Y == ch.Coords.Y).Single().indexInCurrentList;
+            Cell charCell = CellList![charCellIndex];
+            ch.Coords = new(charCell.CellCoords.X, charCell.CellCoords.Y, charCell.CellCoords.Z, charCell.CellCoords.Surface);
+            if (ch.Coords.Surface == Surface.Water)
+            {
+                ch.IsWet = true;
+            }
+            ch.Cell = CellList![charCellIndex];
+            CellList![charCellIndex].CellCharacterList?.Add(ch);
+        }
+        public void CharacterMovementUpdate(Character ch, Direction direction, bool isFast, MovementType movementType)
+        {
+            Coords initicalCoords = new(ch.Coords.X, ch.Coords.Y, ch.Coords.Z, ch.Coords.Surface); //maybe replace to Clone 
             int currentCellIndex = CellList!.Where(x => x.CellCoords.X == ch.Coords.X).Where(x => x.CellCoords.Y == ch.Coords.Y).Single().indexInCurrentList;
-            bool moveSuccess = ch.Move(direction, isFast);
+
+            bool moveSuccess;
+            string message = string.Empty;
+            if (movementType == MovementType.GroundMovement)
+            {
+                moveSuccess = ch.Move(direction, isFast, out message);
+            }
+            else
+            {
+                moveSuccess = ((FlyingCharacter)ch).FlyMove(direction, isFast, out message);
+            }
             if (moveSuccess)
             {
                 int? newCellIndex = CellList!.Where(x => x.CellCoords.X == ch.Coords.X).Where(x => x.CellCoords.Y == ch.Coords.Y).SingleOrDefault()?.indexInCurrentList;
@@ -219,15 +280,24 @@ namespace PracticeGame
                 {
                     CellList![currentCellIndex].CellCharacterList!.RemoveAll(x => x == ch);
                     CellList![(int)newCellIndex].CellCharacterList?.Add(ch);
-                    ch.Coords.Surface = CellList![(int)newCellIndex].CellCoords.Surface;
+                    if (ch.Coords.Surface != Surface.Air)
+                    {
+                        ch.Coords.Surface = CellList![(int)newCellIndex].CellCoords.Surface;
+                    }
+                    if (ch.Coords.Surface == Surface.Water)
+                    {
+                        ch.IsWet = true;
+                    }
+                    ch.Cell = CellList![(int)newCellIndex];
+                    ch.OnCharAction(message, ch);
                 }                                       
             }
         }
 
     
-    }//add flight
-    //add loading characters on the map
-    //add map size variations
+    }
+    //add map size to save file and changing char coor if smaller
+    //save a map to the file
     //add surface check to char when changes a cell or smth
     //change messages when switching ground to water and vv
 

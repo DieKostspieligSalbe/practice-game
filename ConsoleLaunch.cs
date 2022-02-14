@@ -242,7 +242,7 @@ namespace Gam
 
         static void Main(string[] args)
         {
-            Map map = new();
+            Map map = new(8);
             var charTable = new Dictionary<string, Character>();
             bool sprintMode = false;
             string? lookCharByName;
@@ -289,6 +289,10 @@ namespace Gam
                         break;
                     case "load":
                         charTable = LoadFromFile(out string lastEntryName);
+                        foreach (Character ch in charTable.Values)
+                        {
+                            map.AddCharacterToOtherCell(ch);
+                        }
                         nameExists = charTable.TryGetValue(lastEntryName, out checkChar);
                         if (nameExists)
                         {
@@ -308,50 +312,50 @@ namespace Gam
                     case "w":
                         if (usedChar is FlyingCharacter fly && usedChar.Coords.Surface == Surface.Air) //pattern matching
                         {
-                            fly.FlyMove(Direction.YForward, sprintMode);
+                            map.CharacterMovementUpdate(fly, Direction.YForward, sprintMode, MovementType.Flight);
                             break;
                         } else
                         {
-                            map.CharacterMovementUpdate(usedChar!, Direction.YForward, sprintMode);
+                            map.CharacterMovementUpdate(usedChar!, Direction.YForward, sprintMode, MovementType.GroundMovement);
                             break;
                         }
                     case "s":
                         if (usedChar is FlyingCharacter && usedChar.Coords.Surface == Surface.Air) //manual casting
                         {
-                            ((FlyingCharacter)usedChar).FlyMove(Direction.YBackward, sprintMode);
+                            map.CharacterMovementUpdate(usedChar, Direction.YBackward, sprintMode, MovementType.Flight);
                             break;
                         }
                         else
                         {
-                            map.CharacterMovementUpdate(usedChar!, Direction.YBackward, sprintMode);
+                            map.CharacterMovementUpdate(usedChar!, Direction.YBackward, sprintMode, MovementType.GroundMovement);
                             break;
                         }
                     case "a":
                         if (usedChar is FlyingCharacter && usedChar.Coords.Surface == Surface.Air)
                         {
-                            ((FlyingCharacter)usedChar).FlyMove(Direction.XLeft, sprintMode);
+                            map.CharacterMovementUpdate(usedChar, Direction.XLeft, sprintMode, MovementType.Flight);
                             break;
                         }
                         else
                         {
-                            map.CharacterMovementUpdate(usedChar!, Direction.XLeft, sprintMode);
+                            map.CharacterMovementUpdate(usedChar!, Direction.XLeft, sprintMode, MovementType.GroundMovement);
                             break;
                         }
                     case "d":
                         if (usedChar is FlyingCharacter && usedChar.Coords.Surface == Surface.Air)
                         {
-                            ((FlyingCharacter)usedChar).FlyMove(Direction.XRight, sprintMode);
+                            map.CharacterMovementUpdate(usedChar, Direction.XRight, sprintMode, MovementType.Flight);
                             break;
                         }
                         else
                         {
-                            map.CharacterMovementUpdate(usedChar!, Direction.XRight, sprintMode);
+                            map.CharacterMovementUpdate(usedChar!, Direction.XRight, sprintMode, MovementType.GroundMovement);
                             break;
                         }
                     case "up":
                         if (usedChar is FlyingCharacter && usedChar.Coords.Surface == Surface.Air)
                         {
-                            ((FlyingCharacter)usedChar).FlyMove(Direction.ZUp, sprintMode);
+                            map.CharacterMovementUpdate(usedChar, Direction.ZUp, sprintMode, MovementType.Flight);
                             break;
                         }
                         else if (usedChar is FlyingCharacter && usedChar.Coords.Surface == Surface.Ground)
@@ -361,18 +365,18 @@ namespace Gam
                         }
                         else
                         {
-                            map.CharacterMovementUpdate(usedChar!, Direction.ZUp, sprintMode);
+                            map.CharacterMovementUpdate(usedChar!, Direction.ZUp, sprintMode, MovementType.GroundMovement);
                             break;
                         }
                     case "down":
                         if (usedChar is FlyingCharacter && usedChar.Coords.Surface == Surface.Air)
                         {
-                            ((FlyingCharacter)usedChar).FlyMove(Direction.ZDown, sprintMode);
+                            map.CharacterMovementUpdate(usedChar, Direction.ZDown, sprintMode, MovementType.Flight);
                             break;
                         }
                         else
                         {
-                            map.CharacterMovementUpdate(usedChar!, Direction.ZDown, sprintMode);
+                            map.CharacterMovementUpdate(usedChar!, Direction.ZDown, sprintMode, MovementType.GroundMovement);
                             break;
                         }
                     case "fly":
